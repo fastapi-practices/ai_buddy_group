@@ -32,6 +32,12 @@ class UpdateAIBuddyResourceParam(SchemaBase):
     )
     model_ids: list[int] | None = Field(None, description='可见模型 ID 列表，None 表示全部可见，空列表表示全部不可见')
     mcp_ids: list[int] | None = Field(None, description='可见 MCP ID 列表，None 表示全部可见，空列表表示全部不可见')
+    expert_ids: list[int] | None = Field(None, description='可见专家 ID 列表，None 表示全部可见，空列表表示全部不可见')
+    knowledge_ids: list[int] | None = Field(
+        None,
+        description='可见知识库 ID 列表，None 表示全部可见，空列表表示全部不可见',
+    )
+    skill_ids: list[int] | None = Field(None, description='可见技能 ID 列表，None 表示全部可见，空列表表示全部不可见')
 
 
 class AIBuddyUserIdsParam(SchemaBase):
@@ -65,6 +71,12 @@ class GetAIBuddyGroupWithResourceDetail(GetAIBuddyGroupDetail):
     )
     model_ids: list[int] | None = Field(None, description='可见模型 ID 列表，None 表示全部可见，空列表表示全部不可见')
     mcp_ids: list[int] | None = Field(None, description='可见 MCP ID 列表，None 表示全部可见，空列表表示全部不可见')
+    expert_ids: list[int] | None = Field(None, description='可见专家 ID 列表，None 表示全部可见，空列表表示全部不可见')
+    knowledge_ids: list[int] | None = Field(
+        None,
+        description='可见知识库 ID 列表，None 表示全部可见，空列表表示全部不可见',
+    )
+    skill_ids: list[int] | None = Field(None, description='可见技能 ID 列表，None 表示全部可见，空列表表示全部不可见')
 
 
 class GetAIBuddyUserDetail(SchemaBase):

@@ -6,7 +6,7 @@ begin
     select id into ai_buddy_menu_id from sys_menu where name = 'PluginAIBuddy';
 
     insert into sys_menu (title, name, path, sort, icon, type, component, perms, status, display, cache, link, remark, parent_id, created_time, updated_time)
-    values ('ai-buddy-group.menu', 'AIBuddyGroupManage', '/plugins/ai-buddy/group', 9, 'material-symbols:group-outline', 1, '/plugins/ai-buddy-group/views/index', null, 1, 1, 1, '', null, ai_buddy_menu_id, now(), null)
+    values ('ai-buddy-group.menu', 'AIBuddyGroupManage', '/plugins/ai-buddy/group', 13, 'material-symbols:group-outline', 1, '/plugins/ai-buddy-group/views/index', null, 1, 1, 1, '', null, ai_buddy_menu_id, now(), null)
     returning id into ai_buddy_group_menu_id;
 
     insert into sys_menu (title, name, path, sort, icon, type, component, perms, status, display, cache, link, remark, parent_id, created_time, updated_time)

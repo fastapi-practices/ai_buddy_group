@@ -3,8 +3,8 @@ from collections.abc import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.common.exception import errors
-from backend.plugin.ai_buddy.agent.policy.base import AIBuddyResourcePolicy
-from backend.plugin.ai_buddy.agent.policy.context import AIBuddyInvocationContext
+from backend.plugin.ai_buddy.policy.base import AIBuddyResourcePolicy
+from backend.plugin.ai_buddy.policy.context import AIBuddyInvocationContext
 from backend.plugin.ai_buddy_group.crud.crud_group import ai_buddy_group_dao
 from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_resource_dao
 from backend.plugin.ai_buddy_group.crud.crud_user import ai_buddy_user_dao

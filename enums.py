@@ -7,6 +7,9 @@ class AIBuddyResourceType(IntEnum):
     provider = 0
     model = 1
     mcp = 2
+    expert = 3
+    knowledge = 4
+    skill = 5
 
 
 class AIBuddyResourceScopeType(IntEnum):

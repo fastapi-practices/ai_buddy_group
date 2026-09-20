@@ -7,7 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.admin.model import User
 from backend.common.exception import errors
 from backend.common.pagination import paging_data
-from backend.plugin.ai_buddy.model import AIBuddyMcp, AIBuddyModel, AIBuddyProvider
+from backend.plugin.ai_buddy.model import (
+    AIBuddyExpert,
+    AIBuddyKnowledgeBase,
+    AIBuddyMcp,
+    AIBuddyModel,
+    AIBuddyProvider,
+    AIBuddySkill,
+)
 from backend.plugin.ai_buddy_group.crud.crud_group import ai_buddy_group_dao
 from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_resource_dao
 from backend.plugin.ai_buddy_group.crud.crud_user import ai_buddy_user_dao
@@ -61,7 +68,14 @@ class AIBuddyGroupService:
         if not ai_buddy_group:
             raise errors.NotFoundError(msg='分组不存在')
         resources = await ai_buddy_resource_dao.get_by_group_id(db, pk)
-        resource_ids = {'provider_ids': None, 'model_ids': None, 'mcp_ids': None}
+        resource_ids = {
+            'provider_ids': None,
+            'model_ids': None,
+            'mcp_ids': None,
+            'expert_ids': None,
+            'knowledge_ids': None,
+            'skill_ids': None,
+        }
         for resource in resources:
             field = f'{AIBuddyResourceType(resource.resource_type).name}_ids'
             scope_type = AIBuddyResourceScopeType(resource.scope_type)
@@ -153,6 +167,24 @@ class AIBuddyGroupService:
                     'scope_type': AIBuddyResourceScopeType.all.value,
                     'resource_id': 0,
                 },
+                {
+                    'group_id': ai_buddy_group.id,
+                    'resource_type': AIBuddyResourceType.expert.value,
+                    'scope_type': AIBuddyResourceScopeType.all.value,
+                    'resource_id': 0,
+                },
+                {
+                    'group_id': ai_buddy_group.id,
+                    'resource_type': AIBuddyResourceType.knowledge.value,
+                    'scope_type': AIBuddyResourceScopeType.all.value,
+                    'resource_id': 0,
+                },
+                {
+                    'group_id': ai_buddy_group.id,
+                    'resource_type': AIBuddyResourceType.skill.value,
+                    'scope_type': AIBuddyResourceScopeType.all.value,
+                    'resource_id': 0,
+                },
             ],
         )
 
@@ -201,10 +233,16 @@ class AIBuddyGroupService:
         provider_ids = None if obj.provider_ids is None else list(dict.fromkeys(obj.provider_ids))
         model_ids = None if obj.model_ids is None else list(dict.fromkeys(obj.model_ids))
         mcp_ids = None if obj.mcp_ids is None else list(dict.fromkeys(obj.mcp_ids))
+        expert_ids = None if obj.expert_ids is None else list(dict.fromkeys(obj.expert_ids))
+        knowledge_ids = None if obj.knowledge_ids is None else list(dict.fromkeys(obj.knowledge_ids))
+        skill_ids = None if obj.skill_ids is None else list(dict.fromkeys(obj.skill_ids))
         for resource_ids, model, error_msg in (
             (provider_ids, AIBuddyProvider, '服务商不存在'),
             (model_ids, AIBuddyModel, '模型不存在'),
             (mcp_ids, AIBuddyMcp, 'MCP不存在'),
+            (expert_ids, AIBuddyExpert, '专家不存在'),
+            (knowledge_ids, AIBuddyKnowledgeBase, '知识库不存在'),
+            (skill_ids, AIBuddySkill, '技能不存在'),
         ):
             if not resource_ids:
                 continue
@@ -219,6 +257,9 @@ class AIBuddyGroupService:
             (AIBuddyResourceType.provider, provider_ids),
             (AIBuddyResourceType.model, model_ids),
             (AIBuddyResourceType.mcp, mcp_ids),
+            (AIBuddyResourceType.expert, expert_ids),
+            (AIBuddyResourceType.knowledge, knowledge_ids),
+            (AIBuddyResourceType.skill, skill_ids),
         ):
             if resource_ids is None:
                 resource_payloads.append({

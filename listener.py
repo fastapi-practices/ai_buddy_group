@@ -9,11 +9,25 @@ from sqlalchemy.sql import visitors
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.sql.schema import Table
 
-from backend.plugin.ai_buddy.model import AIBuddyMcp, AIBuddyModel, AIBuddyProvider
+from backend.plugin.ai_buddy.model import (
+    AIBuddyExpert,
+    AIBuddyKnowledgeBase,
+    AIBuddyMcp,
+    AIBuddyModel,
+    AIBuddyProvider,
+    AIBuddySkill,
+)
 from backend.plugin.ai_buddy_group.enums import AIBuddyResourceScopeType, AIBuddyResourceType
 from backend.plugin.ai_buddy_group.model import AIBuddyGroup, AIBuddyResource, AIBuddyUser
 
-AI_GROUP_RESOURCE_MODEL_CLASSES = frozenset({AIBuddyProvider, AIBuddyModel, AIBuddyMcp})
+AI_GROUP_RESOURCE_MODEL_CLASSES = frozenset({
+    AIBuddyProvider,
+    AIBuddyModel,
+    AIBuddyMcp,
+    AIBuddyExpert,
+    AIBuddyKnowledgeBase,
+    AIBuddySkill,
+})
 AI_GROUP_RESOURCE_TABLE_MODEL_MAP = {model.__tablename__: model for model in AI_GROUP_RESOURCE_MODEL_CLASSES}
 
 
@@ -125,6 +139,42 @@ def apply_ai_buddy_group_visibility_criteria(
             resource_type=AIBuddyResourceType.mcp,
         )
         options.append(with_loader_criteria(AIBuddyMcp, mcp_criteria, include_aliases=True))
+    if AIBuddyExpert in resource_models:
+        options.append(
+            with_loader_criteria(
+                AIBuddyExpert,
+                build_ai_buddy_resource_visibility_criteria(
+                    user_id=user_id,
+                    resource_id=AIBuddyExpert.id,
+                    resource_type=AIBuddyResourceType.expert,
+                ),
+                include_aliases=True,
+            )
+        )
+    if AIBuddyKnowledgeBase in resource_models:
+        options.append(
+            with_loader_criteria(
+                AIBuddyKnowledgeBase,
+                build_ai_buddy_resource_visibility_criteria(
+                    user_id=user_id,
+                    resource_id=AIBuddyKnowledgeBase.id,
+                    resource_type=AIBuddyResourceType.knowledge,
+                ),
+                include_aliases=True,
+            )
+        )
+    if AIBuddySkill in resource_models:
+        options.append(
+            with_loader_criteria(
+                AIBuddySkill,
+                build_ai_buddy_resource_visibility_criteria(
+                    user_id=user_id,
+                    resource_id=AIBuddySkill.id,
+                    resource_type=AIBuddyResourceType.skill,
+                ),
+                include_aliases=True,
+            )
+        )
 
     if not options:
         return statement

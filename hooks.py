@@ -3,9 +3,10 @@ from typing import Any, cast
 from fastapi import FastAPI
 from sqlalchemy import Select, event
 from sqlalchemy.orm import ORMExecuteState, Session
+from starlette_context.errors import ContextDoesNotExistError
 
 from backend.common.context import ctx
-from backend.plugin.ai_buddy.agent.policy.registry import register_ai_buddy_resource_policy
+from backend.plugin.ai_buddy.policy.registry import register_ai_buddy_resource_policy
 from backend.plugin.ai_buddy_group.listener import (
     AI_GROUP_RESOURCE_MODEL_CLASSES,
     apply_ai_buddy_group_visibility_criteria,
@@ -32,8 +33,11 @@ def inject_ai_buddy_group_visibility_filter(orm_execute_state: ORMExecuteState) 
         resource_models = get_statement_ai_buddy_resource_models(statement)
     if not resource_models:
         return
-    user_id = ctx.user_id
-    is_superuser = ctx.is_superuser
+    try:
+        user_id = ctx.user_id
+        is_superuser = ctx.is_superuser
+    except ContextDoesNotExistError:
+        return
     if user_id is None or is_superuser:
         return
     orm_execute_state.statement = apply_ai_buddy_group_visibility_criteria(
