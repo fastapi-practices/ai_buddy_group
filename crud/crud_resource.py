@@ -1,15 +1,30 @@
 from collections.abc import Sequence
 from typing import Any
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
+from backend.common.model import Base
 from backend.plugin.ai_buddy_group.model import AIBuddyResource
 from backend.utils.timezone import timezone
 
 
 class CRUDAIBuddyResource(CRUDPlus[AIBuddyResource]):
     """AI 分组资源数据库操作类"""
+
+    @staticmethod
+    async def count_existing_resources(db: AsyncSession, model: type[Base], resource_ids: list[int]) -> int:
+        """
+        统计指定类型中仍有效的资源
+
+        :param db: 数据库会话
+        :param model: 资源模型
+        :param resource_ids: 资源 ID 列表
+        :return:
+        """
+        stmt = select(func.count()).select_from(model).where(model.id.in_(resource_ids), model.deleted == 0)
+        return (await db.execute(stmt)).scalar_one()
 
     async def get_by_group_id(self, db: AsyncSession, group_id: int) -> Sequence[AIBuddyResource]:
         """

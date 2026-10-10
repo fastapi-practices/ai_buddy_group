@@ -1,10 +1,8 @@
 from collections.abc import Sequence
 from typing import Any
 
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.admin.model import User
 from backend.common.exception import errors
 from backend.common.pagination import paging_data
 from backend.plugin.ai_buddy.model import (
@@ -37,11 +35,16 @@ class AIBuddyGroupService:
 
     @staticmethod
     async def _validate_user_ids(*, db: AsyncSession, user_ids: list[int]) -> None:
-        """校验指定用户是否存在"""
+        """
+        校验指定用户是否存在
+
+        :param db: 数据库会话
+        :param user_ids: 用户 ID 列表
+        :return:
+        """
         if not user_ids:
             raise errors.RequestError(msg='用户 ID 列表不能为空')
-        stmt = select(func.count()).select_from(User).where(User.id.in_(user_ids), User.deleted == 0)
-        count = (await db.execute(stmt)).scalar_one()
+        count = await ai_buddy_user_dao.count_existing_users(db, user_ids)
         if count != len(user_ids):
             raise errors.NotFoundError(msg='用户不存在')
 
@@ -100,8 +103,7 @@ class AIBuddyGroupService:
         ai_buddy_group_select = await ai_buddy_group_dao.get_select(name)
         return await paging_data(db, ai_buddy_group_select)
 
-    @staticmethod
-    async def get_user_groups(*, db: AsyncSession, user_id: int) -> Sequence[AIBuddyGroup]:
+    async def get_user_groups(self, *, db: AsyncSession, user_id: int) -> Sequence[AIBuddyGroup]:
         """
         获取用户所属分组
 
@@ -109,7 +111,7 @@ class AIBuddyGroupService:
         :param user_id: 用户 ID
         :return:
         """
-        await AIBuddyGroupService._validate_user_ids(db=db, user_ids=[user_id])
+        await self._validate_user_ids(db=db, user_ids=[user_id])
         group_ids = await ai_buddy_user_dao.get_group_ids_by_user(db, user_id)
         return await ai_buddy_group_dao.get_by_ids(db, group_ids)
 
@@ -246,8 +248,7 @@ class AIBuddyGroupService:
         ):
             if not resource_ids:
                 continue
-            stmt = select(func.count()).select_from(model).where(model.id.in_(resource_ids), model.deleted == 0)
-            resource_count = (await db.execute(stmt)).scalar_one()
+            resource_count = await ai_buddy_resource_dao.count_existing_resources(db, model, resource_ids)
             if resource_count != len(resource_ids):
                 raise errors.NotFoundError(msg=error_msg)
 
@@ -287,8 +288,7 @@ class AIBuddyGroupService:
                 )
         return await ai_buddy_resource_dao.bulk_create(db, resource_payloads)
 
-    @staticmethod
-    async def bind_users(*, db: AsyncSession, pk: int, obj: AIBuddyUserIdsParam) -> None:
+    async def bind_users(self, *, db: AsyncSession, pk: int, obj: AIBuddyUserIdsParam) -> None:
         """
         绑定分组用户
 
@@ -301,7 +301,7 @@ class AIBuddyGroupService:
         if not ai_buddy_group:
             raise errors.NotFoundError(msg='分组不存在')
         user_ids = list(dict.fromkeys(obj.user_ids))
-        await AIBuddyGroupService._validate_user_ids(db=db, user_ids=user_ids)
+        await self._validate_user_ids(db=db, user_ids=user_ids)
         existing_users = await ai_buddy_user_dao.get_by_group_and_users(db, pk, user_ids)
         if existing_users:
             raise errors.ConflictError(msg='用户已绑定此分组')

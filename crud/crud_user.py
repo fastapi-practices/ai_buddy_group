@@ -1,15 +1,29 @@
 from collections.abc import Sequence
 from typing import Any
 
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
+from backend.app.admin.model import User
 from backend.plugin.ai_buddy_group.model import AIBuddyUser
 from backend.utils.timezone import timezone
 
 
 class CRUDAIBuddyUser(CRUDPlus[AIBuddyUser]):
     """AI 分组用户数据库操作类"""
+
+    @staticmethod
+    async def count_existing_users(db: AsyncSession, user_ids: list[int]) -> int:
+        """
+        统计仍有效的系统用户
+
+        :param db: 数据库会话
+        :param user_ids: 用户 ID 列表
+        :return:
+        """
+        stmt = select(func.count()).select_from(User).where(User.id.in_(user_ids), User.deleted == 0)
+        return (await db.execute(stmt)).scalar_one()
 
     async def get_by_group_id(self, db: AsyncSession, group_id: int) -> Sequence[AIBuddyUser]:
         """

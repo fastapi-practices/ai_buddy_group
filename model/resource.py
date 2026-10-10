@@ -23,6 +23,6 @@ class AIBuddyResource(Base):
 
     id: Mapped[id_key] = mapped_column(init=False)
     group_id: Mapped[int] = mapped_column(sa.BigInteger, index=True, comment='分组 ID')
-    resource_type: Mapped[int] = mapped_column(index=True, comment='资源类型（0服务商 1模型 2MCP）')
+    resource_type: Mapped[int] = mapped_column(index=True, comment='资源类型（0服务商 1模型 2MCP 3专家 4知识库 5技能）')
     scope_type: Mapped[int] = mapped_column(default=0, index=True, comment='范围类型（0全部 1无 2指定）')
     resource_id: Mapped[int] = mapped_column(sa.BigInteger, default=0, index=True, comment='资源 ID')

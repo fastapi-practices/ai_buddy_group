@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.common.exception import errors
-from backend.plugin.ai_buddy.policy.base import AIBuddyResourcePolicy
+from backend.plugin.ai_buddy.policy.base import AIBuddyResourcePolicy as BaseAIBuddyResourcePolicy
 from backend.plugin.ai_buddy.policy.context import AIBuddyInvocationContext
 from backend.plugin.ai_buddy_group.crud.crud_group import ai_buddy_group_dao
 from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_resource_dao
@@ -12,7 +12,7 @@ from backend.plugin.ai_buddy_group.enums import AIBuddyResourceScopeType, AIBudd
 from backend.plugin.ai_buddy_group.model import AIBuddyResource
 
 
-class AIBuddyResourcePolicy(AIBuddyResourcePolicy):
+class AIBuddyGroupResourcePolicy(BaseAIBuddyResourcePolicy):
     """AI 分组资源策略"""
 
     @staticmethod
@@ -55,7 +55,7 @@ class AIBuddyResourcePolicy(AIBuddyResourcePolicy):
         groups = await ai_buddy_group_dao.get_by_ids(db, group_ids)
         if not groups:
             return
-        resources = await ai_buddy_resource_dao.get_by_group_ids(db, group_ids)
+        resources = await ai_buddy_resource_dao.get_by_group_ids(db, [group.id for group in groups])
         provider_ids = self._resolve_ids(
             resources=resources,
             resource_type=AIBuddyResourceType.provider,
@@ -76,4 +76,4 @@ class AIBuddyResourcePolicy(AIBuddyResourcePolicy):
             raise errors.AuthorizationError(msg='当前用户无权使用指定 MCP')
 
 
-ai_buddy_resource_policy: AIBuddyResourcePolicy = AIBuddyResourcePolicy()
+ai_buddy_resource_policy: AIBuddyGroupResourcePolicy = AIBuddyGroupResourcePolicy()
