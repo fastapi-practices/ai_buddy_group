@@ -155,10 +155,13 @@ def apply_ai_buddy_group_visibility_criteria(
         options.append(
             with_loader_criteria(
                 AIBuddyKnowledgeBase,
-                build_ai_buddy_resource_visibility_criteria(
-                    user_id=user_id,
-                    resource_id=AIBuddyKnowledgeBase.id,
-                    resource_type=AIBuddyResourceType.knowledge,
+                sa.or_(
+                    AIBuddyKnowledgeBase.user_id == user_id,
+                    build_ai_buddy_resource_visibility_criteria(
+                        user_id=user_id,
+                        resource_id=AIBuddyKnowledgeBase.id,
+                        resource_type=AIBuddyResourceType.knowledge,
+                    ),
                 ),
                 include_aliases=True,
             )

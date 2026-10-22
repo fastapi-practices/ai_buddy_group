@@ -5,6 +5,12 @@ from pydantic import ConfigDict, Field
 from backend.common.schema import SchemaBase
 
 
+class AIBuddyGroupQueryParam(SchemaBase):
+    """AI 分组查询参数"""
+
+    name: str | None = Field(None, description='分组名称')
+
+
 class AIBuddyGroupSchemaBase(SchemaBase):
     """AI 分组基础模型"""
 

@@ -9,6 +9,7 @@ from backend.common.security.permission import RequestPermission
 from backend.common.security.rbac import DependsRBAC
 from backend.database.db import CurrentSession, CurrentSessionTransaction
 from backend.plugin.ai_buddy_group.schema.group import (
+    AIBuddyGroupQueryParam,
     AIBuddyUserIdsParam,
     CreateAIBuddyGroupParam,
     DeleteAIBuddyGroupParam,
@@ -57,9 +58,9 @@ async def get_ai_buddy_group(
 )
 async def get_ai_buddy_groups_paginated(
     db: CurrentSession,
-    name: Annotated[str | None, Query(description='分组名称')] = None,
+    query: Annotated[AIBuddyGroupQueryParam, Query()],
 ) -> ResponseSchemaModel[PageData[GetAIBuddyGroupDetail]]:
-    page_data = await ai_buddy_group_service.get_list(db=db, name=name)
+    page_data = await ai_buddy_group_service.get_list(db=db, name=query.name)
     return response_base.success(data=page_data)
 
 
