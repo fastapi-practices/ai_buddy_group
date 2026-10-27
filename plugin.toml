@@ -1,7 +1,7 @@
 [plugin]
 icon = "https://wu-clan.github.io/picx-images-hosting/logo/fba.svg"
 summary = "AI Buddy Group"
-version = "0.0.1"
+version = "0.1.0"
 description = "用于管理 AI Buddy 资源分组及资源可见性"
 author = "wu-clan"
 tags = ["ai"]
