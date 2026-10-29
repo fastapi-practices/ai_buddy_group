@@ -18,7 +18,7 @@ from backend.plugin.ai_buddy.model import (
     AIBuddySkill,
 )
 from backend.plugin.ai_buddy_group.enums import AIBuddyResourceScopeType, AIBuddyResourceType
-from backend.plugin.ai_buddy_group.model import AIBuddyGroup, AIBuddyResource, AIBuddyUser
+from backend.plugin.ai_buddy_group.model import AIBuddyGroup, AIBuddyGroupResource, AIBuddyGroupUser
 
 AI_GROUP_RESOURCE_MODEL_CLASSES = frozenset({
     AIBuddyProvider,
@@ -62,31 +62,31 @@ def build_ai_buddy_resource_visibility_criteria(
     :return:
     """
     user_group_exists = sa.exists().where(
-        AIBuddyUser.user_id == user_id,
-        AIBuddyUser.deleted == 0,
-        AIBuddyGroup.id == AIBuddyUser.group_id,
+        AIBuddyGroupUser.user_id == user_id,
+        AIBuddyGroupUser.deleted == 0,
+        AIBuddyGroup.id == AIBuddyGroupUser.group_id,
         AIBuddyGroup.deleted == 0,
     )
     all_visible_exists = sa.exists().where(
-        AIBuddyUser.user_id == user_id,
-        AIBuddyUser.deleted == 0,
-        AIBuddyGroup.id == AIBuddyUser.group_id,
+        AIBuddyGroupUser.user_id == user_id,
+        AIBuddyGroupUser.deleted == 0,
+        AIBuddyGroup.id == AIBuddyGroupUser.group_id,
         AIBuddyGroup.deleted == 0,
-        AIBuddyResource.group_id == AIBuddyGroup.id,
-        AIBuddyResource.deleted == 0,
-        AIBuddyResource.resource_type == resource_type.value,
-        AIBuddyResource.scope_type == AIBuddyResourceScopeType.all.value,
+        AIBuddyGroupResource.group_id == AIBuddyGroup.id,
+        AIBuddyGroupResource.deleted == 0,
+        AIBuddyGroupResource.resource_type == resource_type.value,
+        AIBuddyGroupResource.scope_type == AIBuddyResourceScopeType.all.value,
     )
     specified_visible_exists = sa.exists().where(
-        AIBuddyUser.user_id == user_id,
-        AIBuddyUser.deleted == 0,
-        AIBuddyGroup.id == AIBuddyUser.group_id,
+        AIBuddyGroupUser.user_id == user_id,
+        AIBuddyGroupUser.deleted == 0,
+        AIBuddyGroup.id == AIBuddyGroupUser.group_id,
         AIBuddyGroup.deleted == 0,
-        AIBuddyResource.group_id == AIBuddyGroup.id,
-        AIBuddyResource.deleted == 0,
-        AIBuddyResource.resource_type == resource_type.value,
-        AIBuddyResource.scope_type == AIBuddyResourceScopeType.specified.value,
-        AIBuddyResource.resource_id == resource_id,
+        AIBuddyGroupResource.group_id == AIBuddyGroup.id,
+        AIBuddyGroupResource.deleted == 0,
+        AIBuddyGroupResource.resource_type == resource_type.value,
+        AIBuddyGroupResource.scope_type == AIBuddyResourceScopeType.specified.value,
+        AIBuddyGroupResource.resource_id == resource_id,
     )
     return sa.or_(sa.not_(user_group_exists), all_visible_exists, specified_visible_exists)
 

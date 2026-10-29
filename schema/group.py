@@ -29,7 +29,7 @@ class UpdateAIBuddyGroupParam(SchemaBase):
     description: str | None = Field(None, description='分组描述')
 
 
-class UpdateAIBuddyResourceParam(SchemaBase):
+class UpdateAIBuddyGroupResourceParam(SchemaBase):
     """更新 AI 分组资源参数"""
 
     provider_ids: list[int] | None = Field(
@@ -46,8 +46,8 @@ class UpdateAIBuddyResourceParam(SchemaBase):
     skill_ids: list[int] | None = Field(None, description='可见技能 ID 列表，None 表示全部可见，空列表表示全部不可见')
 
 
-class AIBuddyUserIdsParam(SchemaBase):
-    """AI 分组用户 ID 参数"""
+class AIBuddyGroupUserParam(SchemaBase):
+    """AI 分组用户参数"""
 
     user_ids: list[int] = Field(description='用户 ID 列表')
 
@@ -85,7 +85,7 @@ class GetAIBuddyGroupWithResourceDetail(GetAIBuddyGroupDetail):
     skill_ids: list[int] | None = Field(None, description='可见技能 ID 列表，None 表示全部可见，空列表表示全部不可见')
 
 
-class GetAIBuddyUserDetail(SchemaBase):
+class GetAIBuddyGroupUserDetail(SchemaBase):
     """AI 分组用户详情"""
 
     model_config = ConfigDict(from_attributes=True)

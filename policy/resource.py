@@ -6,10 +6,10 @@ from backend.common.exception import errors
 from backend.plugin.ai_buddy.policy.base import AIBuddyResourcePolicy as BaseAIBuddyResourcePolicy
 from backend.plugin.ai_buddy.policy.context import AIBuddyInvocationContext
 from backend.plugin.ai_buddy_group.crud.crud_group import ai_buddy_group_dao
-from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_resource_dao
-from backend.plugin.ai_buddy_group.crud.crud_user import ai_buddy_user_dao
+from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_group_resource_dao
+from backend.plugin.ai_buddy_group.crud.crud_user import ai_buddy_group_user_dao
 from backend.plugin.ai_buddy_group.enums import AIBuddyResourceScopeType, AIBuddyResourceType
-from backend.plugin.ai_buddy_group.model import AIBuddyResource
+from backend.plugin.ai_buddy_group.model import AIBuddyGroupResource
 
 
 class AIBuddyGroupResourcePolicy(BaseAIBuddyResourcePolicy):
@@ -18,7 +18,7 @@ class AIBuddyGroupResourcePolicy(BaseAIBuddyResourcePolicy):
     @staticmethod
     def _resolve_ids(
         *,
-        resources: Sequence[AIBuddyResource],
+        resources: Sequence[AIBuddyGroupResource],
         resource_type: AIBuddyResourceType,
     ) -> frozenset[int] | None:
         """
@@ -49,13 +49,13 @@ class AIBuddyGroupResourcePolicy(BaseAIBuddyResourcePolicy):
         """
         if context.is_superuser:
             return
-        group_ids = await ai_buddy_user_dao.get_group_ids_by_user(db, context.user_id)
+        group_ids = await ai_buddy_group_user_dao.get_group_ids_by_user(db, context.user_id)
         if not group_ids:
             return
         groups = await ai_buddy_group_dao.get_by_ids(db, group_ids)
         if not groups:
             return
-        resources = await ai_buddy_resource_dao.get_by_group_ids(db, [group.id for group in groups])
+        resources = await ai_buddy_group_resource_dao.get_by_group_ids(db, [group.id for group in groups])
         provider_ids = self._resolve_ids(
             resources=resources,
             resource_type=AIBuddyResourceType.provider,

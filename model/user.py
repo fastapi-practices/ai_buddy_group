@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from backend.common.model import Base, id_key
 
 
-class AIBuddyUser(Base):
+class AIBuddyGroupUser(Base):
     """AI 分组用户表"""
 
     __tablename__ = 'ai_buddy_group_user'

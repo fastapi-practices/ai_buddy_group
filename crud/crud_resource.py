@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
 from backend.common.model import Base
-from backend.plugin.ai_buddy_group.model import AIBuddyResource
+from backend.plugin.ai_buddy_group.model import AIBuddyGroupResource
 from backend.utils.timezone import timezone
 
 
-class CRUDAIBuddyResource(CRUDPlus[AIBuddyResource]):
+class CRUDAIBuddyGroupResource(CRUDPlus[AIBuddyGroupResource]):
     """AI 分组资源数据库操作类"""
 
     @staticmethod
@@ -26,7 +26,7 @@ class CRUDAIBuddyResource(CRUDPlus[AIBuddyResource]):
         stmt = select(func.count()).select_from(model).where(model.id.in_(resource_ids), model.deleted == 0)
         return (await db.execute(stmt)).scalar_one()
 
-    async def get_by_group_id(self, db: AsyncSession, group_id: int) -> Sequence[AIBuddyResource]:
+    async def get_by_group_id(self, db: AsyncSession, group_id: int) -> Sequence[AIBuddyGroupResource]:
         """
         获取分组资源
 
@@ -36,7 +36,7 @@ class CRUDAIBuddyResource(CRUDPlus[AIBuddyResource]):
         """
         return await self.select_models(db, group_id=group_id, deleted=0)
 
-    async def get_by_group_ids(self, db: AsyncSession, group_ids: list[int]) -> Sequence[AIBuddyResource]:
+    async def get_by_group_ids(self, db: AsyncSession, group_ids: list[int]) -> Sequence[AIBuddyGroupResource]:
         """
         批量获取分组资源
 
@@ -99,4 +99,4 @@ class CRUDAIBuddyResource(CRUDPlus[AIBuddyResource]):
         )
 
 
-ai_buddy_resource_dao: CRUDAIBuddyResource = CRUDAIBuddyResource(AIBuddyResource)
+ai_buddy_group_resource_dao: CRUDAIBuddyGroupResource = CRUDAIBuddyGroupResource(AIBuddyGroupResource)

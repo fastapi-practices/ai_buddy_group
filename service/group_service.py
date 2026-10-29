@@ -14,19 +14,19 @@ from backend.plugin.ai_buddy.model import (
     AIBuddySkill,
 )
 from backend.plugin.ai_buddy_group.crud.crud_group import ai_buddy_group_dao
-from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_resource_dao
-from backend.plugin.ai_buddy_group.crud.crud_user import ai_buddy_user_dao
+from backend.plugin.ai_buddy_group.crud.crud_resource import ai_buddy_group_resource_dao
+from backend.plugin.ai_buddy_group.crud.crud_user import ai_buddy_group_user_dao
 from backend.plugin.ai_buddy_group.enums import AIBuddyResourceScopeType, AIBuddyResourceType
 from backend.plugin.ai_buddy_group.model import AIBuddyGroup
 from backend.plugin.ai_buddy_group.schema.group import (
-    AIBuddyUserIdsParam,
+    AIBuddyGroupUserParam,
     CreateAIBuddyGroupParam,
     DeleteAIBuddyGroupParam,
     GetAIBuddyGroupDetail,
+    GetAIBuddyGroupUserDetail,
     GetAIBuddyGroupWithResourceDetail,
-    GetAIBuddyUserDetail,
     UpdateAIBuddyGroupParam,
-    UpdateAIBuddyResourceParam,
+    UpdateAIBuddyGroupResourceParam,
 )
 
 
@@ -44,7 +44,7 @@ class AIBuddyGroupService:
         """
         if not user_ids:
             raise errors.RequestError(msg='用户 ID 列表不能为空')
-        count = await ai_buddy_user_dao.count_existing_users(db, user_ids)
+        count = await ai_buddy_group_user_dao.count_existing_users(db, user_ids)
         if count != len(user_ids):
             raise errors.NotFoundError(msg='用户不存在')
 
@@ -70,7 +70,7 @@ class AIBuddyGroupService:
         ai_buddy_group = await ai_buddy_group_dao.get(db, pk)
         if not ai_buddy_group:
             raise errors.NotFoundError(msg='分组不存在')
-        resources = await ai_buddy_resource_dao.get_by_group_id(db, pk)
+        resources = await ai_buddy_group_resource_dao.get_by_group_id(db, pk)
         resource_ids = {
             'provider_ids': None,
             'model_ids': None,
@@ -112,11 +112,11 @@ class AIBuddyGroupService:
         :return:
         """
         await self._validate_user_ids(db=db, user_ids=[user_id])
-        group_ids = await ai_buddy_user_dao.get_group_ids_by_user(db, user_id)
+        group_ids = await ai_buddy_group_user_dao.get_group_ids_by_user(db, user_id)
         return await ai_buddy_group_dao.get_by_ids(db, group_ids)
 
     @staticmethod
-    async def get_group_users(*, db: AsyncSession, pk: int) -> list[GetAIBuddyUserDetail]:
+    async def get_group_users(*, db: AsyncSession, pk: int) -> list[GetAIBuddyGroupUserDetail]:
         """
         获取分组用户
 
@@ -127,8 +127,8 @@ class AIBuddyGroupService:
         ai_buddy_group = await ai_buddy_group_dao.get(db, pk)
         if not ai_buddy_group:
             raise errors.NotFoundError(msg='分组不存在')
-        users = await ai_buddy_user_dao.get_by_group_id(db, pk)
-        return [GetAIBuddyUserDetail.model_validate(user) for user in users]
+        users = await ai_buddy_group_user_dao.get_by_group_id(db, pk)
+        return [GetAIBuddyGroupUserDetail.model_validate(user) for user in users]
 
     @staticmethod
     async def create(*, db: AsyncSession, obj: CreateAIBuddyGroupParam) -> None:
@@ -148,7 +148,7 @@ class AIBuddyGroupService:
         if await ai_buddy_group_dao.get_by_name(db, payload['name']):
             raise errors.ConflictError(msg='分组已存在')
         ai_buddy_group = await ai_buddy_group_dao.create(db, CreateAIBuddyGroupParam(**payload))
-        await ai_buddy_resource_dao.bulk_create(
+        await ai_buddy_group_resource_dao.bulk_create(
             db,
             [
                 {
@@ -219,7 +219,7 @@ class AIBuddyGroupService:
         return await ai_buddy_group_dao.update(db, pk, payload)
 
     @staticmethod
-    async def update_resources(*, db: AsyncSession, pk: int, obj: UpdateAIBuddyResourceParam) -> int:
+    async def update_resources(*, db: AsyncSession, pk: int, obj: UpdateAIBuddyGroupResourceParam) -> int:
         """
         更新分组资源
 
@@ -248,11 +248,11 @@ class AIBuddyGroupService:
         ):
             if not resource_ids:
                 continue
-            resource_count = await ai_buddy_resource_dao.count_existing_resources(db, model, resource_ids)
+            resource_count = await ai_buddy_group_resource_dao.count_existing_resources(db, model, resource_ids)
             if resource_count != len(resource_ids):
                 raise errors.NotFoundError(msg=error_msg)
 
-        await ai_buddy_resource_dao.delete_by_group_id(db, pk)
+        await ai_buddy_group_resource_dao.delete_by_group_id(db, pk)
         resource_payloads = []
         for resource_type, resource_ids in (
             (AIBuddyResourceType.provider, provider_ids),
@@ -286,9 +286,9 @@ class AIBuddyGroupService:
                     }
                     for resource_id in resource_ids
                 )
-        return await ai_buddy_resource_dao.bulk_create(db, resource_payloads)
+        return await ai_buddy_group_resource_dao.bulk_create(db, resource_payloads)
 
-    async def bind_users(self, *, db: AsyncSession, pk: int, obj: AIBuddyUserIdsParam) -> None:
+    async def bind_users(self, *, db: AsyncSession, pk: int, obj: AIBuddyGroupUserParam) -> None:
         """
         绑定分组用户
 
@@ -302,16 +302,16 @@ class AIBuddyGroupService:
             raise errors.NotFoundError(msg='分组不存在')
         user_ids = list(dict.fromkeys(obj.user_ids))
         await self._validate_user_ids(db=db, user_ids=user_ids)
-        existing_users = await ai_buddy_user_dao.get_by_group_and_users(db, pk, user_ids)
+        existing_users = await ai_buddy_group_user_dao.get_by_group_and_users(db, pk, user_ids)
         if existing_users:
             raise errors.ConflictError(msg='用户已绑定此分组')
-        await ai_buddy_user_dao.bulk_create(
+        await ai_buddy_group_user_dao.bulk_create(
             db,
             [{'group_id': pk, 'user_id': user_id} for user_id in user_ids],
         )
 
     @staticmethod
-    async def unbind_users(*, db: AsyncSession, pk: int, obj: AIBuddyUserIdsParam) -> int:
+    async def unbind_users(*, db: AsyncSession, pk: int, obj: AIBuddyGroupUserParam) -> int:
         """
         移除分组用户
 
@@ -326,7 +326,7 @@ class AIBuddyGroupService:
         user_ids = list(dict.fromkeys(obj.user_ids))
         if not user_ids:
             raise errors.RequestError(msg='用户 ID 列表不能为空')
-        return await ai_buddy_user_dao.delete_by_group_and_users(db, pk, user_ids)
+        return await ai_buddy_group_user_dao.delete_by_group_and_users(db, pk, user_ids)
 
     @staticmethod
     async def delete(*, db: AsyncSession, obj: DeleteAIBuddyGroupParam) -> int:
@@ -337,8 +337,8 @@ class AIBuddyGroupService:
         :param obj: 分组 ID 列表
         :return:
         """
-        await ai_buddy_user_dao.delete_by_group_ids(db, obj.pks)
-        await ai_buddy_resource_dao.delete_by_group_ids(db, obj.pks)
+        await ai_buddy_group_user_dao.delete_by_group_ids(db, obj.pks)
+        await ai_buddy_group_resource_dao.delete_by_group_ids(db, obj.pks)
         return await ai_buddy_group_dao.delete(db, obj.pks)
 
 

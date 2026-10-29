@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from backend.common.model import Base, id_key
 
 
-class AIBuddyResource(Base):
+class AIBuddyGroupResource(Base):
     """AI 分组资源表"""
 
     __tablename__ = 'ai_buddy_group_resource'

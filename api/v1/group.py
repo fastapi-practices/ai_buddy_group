@@ -10,14 +10,14 @@ from backend.common.security.rbac import DependsRBAC
 from backend.database.db import CurrentSession, CurrentSessionTransaction
 from backend.plugin.ai_buddy_group.schema.group import (
     AIBuddyGroupQueryParam,
-    AIBuddyUserIdsParam,
+    AIBuddyGroupUserParam,
     CreateAIBuddyGroupParam,
     DeleteAIBuddyGroupParam,
     GetAIBuddyGroupDetail,
+    GetAIBuddyGroupUserDetail,
     GetAIBuddyGroupWithResourceDetail,
-    GetAIBuddyUserDetail,
     UpdateAIBuddyGroupParam,
-    UpdateAIBuddyResourceParam,
+    UpdateAIBuddyGroupResourceParam,
 )
 from backend.plugin.ai_buddy_group.service.group_service import ai_buddy_group_service
 
@@ -65,10 +65,10 @@ async def get_ai_buddy_groups_paginated(
 
 
 @router.get('/{pk}/users', summary='获取 AI 分组用户', dependencies=[DependsJwtAuth])
-async def get_ai_buddy_users(
+async def get_ai_buddy_group_users(
     db: CurrentSession,
     pk: Annotated[int, Path(description='分组 ID')],
-) -> ResponseSchemaModel[list[GetAIBuddyUserDetail]]:
+) -> ResponseSchemaModel[list[GetAIBuddyGroupUserDetail]]:
     data = await ai_buddy_group_service.get_group_users(db=db, pk=pk)
     return response_base.success(data=data)
 
@@ -94,10 +94,10 @@ async def create_ai_buddy_group(db: CurrentSessionTransaction, obj: CreateAIBudd
         DependsRBAC,
     ],
 )
-async def bind_ai_buddy_users(
+async def bind_ai_buddy_group_users(
     db: CurrentSessionTransaction,
     pk: Annotated[int, Path(description='分组 ID')],
-    obj: AIBuddyUserIdsParam,
+    obj: AIBuddyGroupUserParam,
 ) -> ResponseModel:
     await ai_buddy_group_service.bind_users(db=db, pk=pk, obj=obj)
     return response_base.success()
@@ -130,10 +130,10 @@ async def update_ai_buddy_group(
         DependsRBAC,
     ],
 )
-async def update_ai_buddy_resources(
+async def update_ai_buddy_group_resources(
     db: CurrentSessionTransaction,
     pk: Annotated[int, Path(description='分组 ID')],
-    obj: UpdateAIBuddyResourceParam,
+    obj: UpdateAIBuddyGroupResourceParam,
 ) -> ResponseModel:
     count = await ai_buddy_group_service.update_resources(db=db, pk=pk, obj=obj)
     if count > 0:
@@ -149,10 +149,10 @@ async def update_ai_buddy_resources(
         DependsRBAC,
     ],
 )
-async def unbind_ai_buddy_users(
+async def unbind_ai_buddy_group_users(
     db: CurrentSessionTransaction,
     pk: Annotated[int, Path(description='分组 ID')],
-    obj: AIBuddyUserIdsParam,
+    obj: AIBuddyGroupUserParam,
 ) -> ResponseModel:
     count = await ai_buddy_group_service.unbind_users(db=db, pk=pk, obj=obj)
     if count > 0:

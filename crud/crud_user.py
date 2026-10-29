@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_crud_plus import CRUDPlus
 
 from backend.app.admin.model import User
-from backend.plugin.ai_buddy_group.model import AIBuddyUser
+from backend.plugin.ai_buddy_group.model import AIBuddyGroupUser
 from backend.utils.timezone import timezone
 
 
-class CRUDAIBuddyUser(CRUDPlus[AIBuddyUser]):
+class CRUDAIBuddyGroupUser(CRUDPlus[AIBuddyGroupUser]):
     """AI 分组用户数据库操作类"""
 
     @staticmethod
@@ -25,7 +25,7 @@ class CRUDAIBuddyUser(CRUDPlus[AIBuddyUser]):
         stmt = select(func.count()).select_from(User).where(User.id.in_(user_ids), User.deleted == 0)
         return (await db.execute(stmt)).scalar_one()
 
-    async def get_by_group_id(self, db: AsyncSession, group_id: int) -> Sequence[AIBuddyUser]:
+    async def get_by_group_id(self, db: AsyncSession, group_id: int) -> Sequence[AIBuddyGroupUser]:
         """
         获取分组用户
 
@@ -51,7 +51,7 @@ class CRUDAIBuddyUser(CRUDPlus[AIBuddyUser]):
         db: AsyncSession,
         group_id: int,
         user_ids: list[int],
-    ) -> Sequence[AIBuddyUser]:
+    ) -> Sequence[AIBuddyGroupUser]:
         """
         获取分组下指定用户绑定
 
@@ -136,4 +136,4 @@ class CRUDAIBuddyUser(CRUDPlus[AIBuddyUser]):
         )
 
 
-ai_buddy_user_dao: CRUDAIBuddyUser = CRUDAIBuddyUser(AIBuddyUser)
+ai_buddy_group_user_dao: CRUDAIBuddyGroupUser = CRUDAIBuddyGroupUser(AIBuddyGroupUser)
