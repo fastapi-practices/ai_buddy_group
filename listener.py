@@ -47,7 +47,7 @@ def get_statement_ai_buddy_resource_models(statement: Select[Any]) -> set[type[A
     return resource_models
 
 
-def build_ai_buddy_resource_visibility_criteria(
+def _build_ai_buddy_resource_visibility_criteria(
     *,
     user_id: int,
     resource_id: Any,
@@ -112,19 +112,19 @@ def apply_ai_buddy_group_visibility_criteria(
     options = []
 
     if AIBuddyProvider in resource_models:
-        provider_criteria = build_ai_buddy_resource_visibility_criteria(
+        provider_criteria = _build_ai_buddy_resource_visibility_criteria(
             user_id=user_id,
             resource_id=AIBuddyProvider.id,
             resource_type=AIBuddyResourceType.provider,
         )
         options.append(with_loader_criteria(AIBuddyProvider, provider_criteria, include_aliases=True))
     if AIBuddyModel in resource_models:
-        model_provider_criteria = build_ai_buddy_resource_visibility_criteria(
+        model_provider_criteria = _build_ai_buddy_resource_visibility_criteria(
             user_id=user_id,
             resource_id=AIBuddyModel.provider_id,
             resource_type=AIBuddyResourceType.provider,
         )
-        model_criteria = build_ai_buddy_resource_visibility_criteria(
+        model_criteria = _build_ai_buddy_resource_visibility_criteria(
             user_id=user_id,
             resource_id=AIBuddyModel.id,
             resource_type=AIBuddyResourceType.model,
@@ -133,7 +133,7 @@ def apply_ai_buddy_group_visibility_criteria(
             with_loader_criteria(AIBuddyModel, sa.and_(model_provider_criteria, model_criteria), include_aliases=True)
         )
     if AIBuddyMcp in resource_models:
-        mcp_criteria = build_ai_buddy_resource_visibility_criteria(
+        mcp_criteria = _build_ai_buddy_resource_visibility_criteria(
             user_id=user_id,
             resource_id=AIBuddyMcp.id,
             resource_type=AIBuddyResourceType.mcp,
@@ -143,7 +143,7 @@ def apply_ai_buddy_group_visibility_criteria(
         options.append(
             with_loader_criteria(
                 AIBuddyExpert,
-                build_ai_buddy_resource_visibility_criteria(
+                _build_ai_buddy_resource_visibility_criteria(
                     user_id=user_id,
                     resource_id=AIBuddyExpert.id,
                     resource_type=AIBuddyResourceType.expert,
@@ -157,7 +157,7 @@ def apply_ai_buddy_group_visibility_criteria(
                 AIBuddyKnowledgeBase,
                 sa.or_(
                     AIBuddyKnowledgeBase.user_id == user_id,
-                    build_ai_buddy_resource_visibility_criteria(
+                    _build_ai_buddy_resource_visibility_criteria(
                         user_id=user_id,
                         resource_id=AIBuddyKnowledgeBase.id,
                         resource_type=AIBuddyResourceType.knowledge,
@@ -170,7 +170,7 @@ def apply_ai_buddy_group_visibility_criteria(
         options.append(
             with_loader_criteria(
                 AIBuddySkill,
-                build_ai_buddy_resource_visibility_criteria(
+                _build_ai_buddy_resource_visibility_criteria(
                     user_id=user_id,
                     resource_id=AIBuddySkill.id,
                     resource_type=AIBuddyResourceType.skill,
