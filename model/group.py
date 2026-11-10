@@ -2,7 +2,7 @@ import sqlalchemy as sa
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from backend.common.model import Base, UniversalText, id_key
+from backend.common.model import Base, id_key
 
 
 class AIBuddyGroup(Base):
@@ -16,4 +16,4 @@ class AIBuddyGroup(Base):
 
     id: Mapped[id_key] = mapped_column(init=False)
     name: Mapped[str] = mapped_column(sa.String(100), comment='分组名称')
-    description: Mapped[str | None] = mapped_column(UniversalText, default=None, comment='分组描述')
+    description: Mapped[str | None] = mapped_column(sa.Text, default=None, comment='分组描述')
